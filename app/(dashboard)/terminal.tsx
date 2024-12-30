@@ -18,7 +18,7 @@ export function Terminal() {
   useEffect(() => {
     const timer = setTimeout(() => {
       setTerminalStep((prev) =>
-        prev < terminalSteps.length - 1 ? prev + 1 : prev
+        prev < terminalSteps.length - 1 ? prev + 1 : prev,
       );
     }, 500);
 

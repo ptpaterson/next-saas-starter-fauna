@@ -18,7 +18,7 @@ export default function GeneralPage() {
   const { user } = useUser();
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     updateAccount,
-    { error: '', success: '' }
+    { error: '', success: '' },
   );
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

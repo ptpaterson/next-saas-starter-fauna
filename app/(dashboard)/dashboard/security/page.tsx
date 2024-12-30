@@ -25,7 +25,7 @@ export default function SecurityPage() {
   >(deleteAccount, { error: '', success: '' });
 
   const handlePasswordSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
     // If you call the Server Action directly, it will automatically
@@ -41,7 +41,7 @@ export default function SecurityPage() {
   };
 
   const handleDeleteSubmit = async (
-    event: React.FormEvent<HTMLFormElement>
+    event: React.FormEvent<HTMLFormElement>,
   ) => {
     event.preventDefault();
     startTransition(() => {
