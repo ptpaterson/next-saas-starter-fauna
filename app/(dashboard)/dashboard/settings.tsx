@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { customerPortalAction } from '@/lib/payments/actions';
 import { useActionState } from 'react';
-import { TeamDataWithMembers, User } from '@/lib/db/schema';
+import { Team, WithMembers, User } from '@/lib/db/schema';
 import { removeTeamMember } from '@/app/(login)/actions';
 import { InviteTeamMember } from './invite-team';
 
@@ -14,7 +14,7 @@ type ActionState = {
   success?: string;
 };
 
-export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
+export function Settings({ teamData }: { teamData: Team & WithMembers }) {
   const [removeState, removeAction, isRemovePending] = useActionState<
     ActionState,
     FormData
@@ -61,25 +61,23 @@ export function Settings({ teamData }: { teamData: TeamDataWithMembers }) {
         </CardHeader>
         <CardContent>
           <ul className="space-y-4">
-            {teamData.teamMembers.map((member, index) => (
+            {teamData.members.map((member, index) => (
               <li key={member.id} className="flex items-center justify-between">
                 <div className="flex items-center space-x-4">
                   <Avatar>
                     <AvatarImage
                       src={`/placeholder.svg?height=32&width=32`}
-                      alt={getUserDisplayName(member.user)}
+                      alt={getUserDisplayName(member)}
                     />
                     <AvatarFallback>
-                      {getUserDisplayName(member.user)
+                      {getUserDisplayName(member)
                         .split(' ')
                         .map((n) => n[0])
                         .join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="font-medium">
-                      {getUserDisplayName(member.user)}
-                    </p>
+                    <p className="font-medium">{getUserDisplayName(member)}</p>
                     <p className="text-sm text-muted-foreground capitalize">
                       {member.role}
                     </p>

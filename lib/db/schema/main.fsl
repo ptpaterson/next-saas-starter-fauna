@@ -1,0 +1,119 @@
+// User collection
+collection User {
+  name: String?
+  email: String
+  role: String = "member"
+  createdAt: Time = Time.now()
+  deletedAt: Time?
+
+  compute team: Ref<Team>? = (doc => TeamMember.by_user(doc).first()?.team)
+
+  unique [.email]
+
+  index by_email {
+    terms [.email]
+  }
+
+  index by_role {
+    terms [.role]
+  }
+}
+
+// Team collection
+collection Team {
+  name: String
+  createdAt: Time = Time.now()
+  stripeCustomerId: String?
+  stripeSubscriptionId: String?
+  stripeProductId: String?
+  planName: String?
+  subscriptionStatus: String?
+
+  compute members: Array<Ref<User>> = (doc =>
+    TeamMember.by_team(doc)
+      .map(.user!)
+      .toArray()
+  )
+
+  unique [.stripeCustomerId]
+  unique [.stripeSubscriptionId]
+
+  // Indexes
+  index by_stripeCustomerId {
+    terms [.stripeCustomerId]
+  }
+
+  index by_stripeSubscriptionId {
+    terms [.stripeSubscriptionId]
+  }
+}
+
+// TeamMember collection (represents the relationship between Users and Teams)
+collection TeamMember {
+  user: Ref<User>
+  team: Ref<Team>
+  role: String
+  joinedAt: Time = Time.now()
+
+  unique [.user, .team]
+
+  index by_user_team {
+    terms [.user, .team]
+    values [.role]
+  }
+
+  index by_team {
+    terms [.team]
+    values [.user, .role]
+  }
+
+  index by_user {
+    terms [.user]
+    values [.team, .role]
+  }
+}
+
+// Invitation collection
+collection Invitation {
+  team: Ref<Team>
+  email: String
+  role: String
+  invitedBy: Ref<User>
+  invitedAt: Time = Time.now()
+  status: String = "pending"
+
+  unique [.team, .email]
+
+  index by_email {
+    terms [.email]
+  }
+
+  index by_team {
+    terms [.team]
+  }
+
+  index by_status {
+    terms [.status]
+  }
+}
+
+// ActivityLog collection
+collection ActivityLog {
+  team: Ref<Team>
+  user: Ref<User>?
+  action: String
+  timestamp: Time = Time.now()
+  ipAddress: String?
+
+  index by_team {
+    terms [.team]
+  }
+
+  index by_user {
+    terms [.user]
+  }
+
+  index by_timestamp {
+    terms [.timestamp]
+  }
+}

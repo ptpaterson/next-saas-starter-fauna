@@ -65,12 +65,11 @@ export default function HomePage() {
                 <Database className="h-6 w-6" />
               </div>
               <div className="mt-5">
-                <h2 className="text-lg font-medium text-gray-900">
-                  Postgres and Drizzle ORM
-                </h2>
+                <h2 className="text-lg font-medium text-gray-900">Fauna</h2>
                 <p className="mt-2 text-base text-gray-500">
-                  Robust database solution with an intuitive ORM for efficient
-                  data management and scalability.
+                  the true serverless database that combines document
+                  flexibility with relational power, automatic scaling, and zero
+                  operational overhead.
                 </p>
               </div>
             </div>
@@ -102,13 +101,13 @@ export default function HomePage() {
               </h2>
               <p className="mt-3 max-w-3xl text-lg text-gray-500">
                 Our template provides everything you need to get your SaaS up
-                and running quickly. Don't waste time on boilerplate - focus on
-                what makes your product unique.
+                and running quickly. Don&apos;t waste time on boilerplate -
+                focus on what makes your product unique.
               </p>
             </div>
             <div className="mt-8 lg:mt-0 flex justify-center lg:justify-end">
               <a
-                href="https://github.com/leerob/next-saas-starter"
+                href="https://github.com/ptpaterson/next-saas-starter-fauna"
                 target="_blank"
               >
                 <Button className="bg-white hover:bg-gray-100 text-black border border-gray-200 rounded-full text-xl px-12 py-6 inline-flex items-center justify-center">

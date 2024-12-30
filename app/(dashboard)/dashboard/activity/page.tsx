@@ -11,20 +11,21 @@ import {
   CheckCircle,
   type LucideIcon,
 } from 'lucide-react';
-import { ActivityType } from '@/lib/db/schema';
+import { ACTIVITY_TYPES, ActivityType } from '@/lib/db/schema';
 import { getActivityLogs } from '@/lib/db/queries';
+import { getSession } from '@/lib/auth/session';
 
 const iconMap: Record<ActivityType, LucideIcon> = {
-  [ActivityType.SIGN_UP]: UserPlus,
-  [ActivityType.SIGN_IN]: UserCog,
-  [ActivityType.SIGN_OUT]: LogOut,
-  [ActivityType.UPDATE_PASSWORD]: Lock,
-  [ActivityType.DELETE_ACCOUNT]: UserMinus,
-  [ActivityType.UPDATE_ACCOUNT]: Settings,
-  [ActivityType.CREATE_TEAM]: UserPlus,
-  [ActivityType.REMOVE_TEAM_MEMBER]: UserMinus,
-  [ActivityType.INVITE_TEAM_MEMBER]: Mail,
-  [ActivityType.ACCEPT_INVITATION]: CheckCircle,
+  [ACTIVITY_TYPES.SIGN_UP]: UserPlus,
+  [ACTIVITY_TYPES.SIGN_IN]: UserCog,
+  [ACTIVITY_TYPES.SIGN_OUT]: LogOut,
+  [ACTIVITY_TYPES.UPDATE_PASSWORD]: Lock,
+  [ACTIVITY_TYPES.DELETE_ACCOUNT]: UserMinus,
+  [ACTIVITY_TYPES.UPDATE_ACCOUNT]: Settings,
+  [ACTIVITY_TYPES.CREATE_TEAM]: UserPlus,
+  [ACTIVITY_TYPES.REMOVE_TEAM_MEMBER]: UserMinus,
+  [ACTIVITY_TYPES.INVITE_TEAM_MEMBER]: Mail,
+  [ACTIVITY_TYPES.ACCEPT_INVITATION]: CheckCircle,
 };
 
 function getRelativeTime(date: Date) {
@@ -43,25 +44,25 @@ function getRelativeTime(date: Date) {
 
 function formatAction(action: ActivityType): string {
   switch (action) {
-    case ActivityType.SIGN_UP:
+    case ACTIVITY_TYPES.SIGN_UP:
       return 'You signed up';
-    case ActivityType.SIGN_IN:
+    case ACTIVITY_TYPES.SIGN_IN:
       return 'You signed in';
-    case ActivityType.SIGN_OUT:
+    case ACTIVITY_TYPES.SIGN_OUT:
       return 'You signed out';
-    case ActivityType.UPDATE_PASSWORD:
+    case ACTIVITY_TYPES.UPDATE_PASSWORD:
       return 'You changed your password';
-    case ActivityType.DELETE_ACCOUNT:
+    case ACTIVITY_TYPES.DELETE_ACCOUNT:
       return 'You deleted your account';
-    case ActivityType.UPDATE_ACCOUNT:
+    case ACTIVITY_TYPES.UPDATE_ACCOUNT:
       return 'You updated your account';
-    case ActivityType.CREATE_TEAM:
+    case ACTIVITY_TYPES.CREATE_TEAM:
       return 'You created a new team';
-    case ActivityType.REMOVE_TEAM_MEMBER:
+    case ACTIVITY_TYPES.REMOVE_TEAM_MEMBER:
       return 'You removed a team member';
-    case ActivityType.INVITE_TEAM_MEMBER:
+    case ACTIVITY_TYPES.INVITE_TEAM_MEMBER:
       return 'You invited a team member';
-    case ActivityType.ACCEPT_INVITATION:
+    case ACTIVITY_TYPES.ACCEPT_INVITATION:
       return 'You accepted an invitation';
     default:
       return 'Unknown action occurred';
@@ -69,7 +70,11 @@ function formatAction(action: ActivityType): string {
 }
 
 export default async function ActivityPage() {
-  const logs = await getActivityLogs();
+  const session = await getSession();
+  if (!session) {
+    throw new Error('User not authenticated');
+  }
+  const logs = await getActivityLogs(session.user.id);
 
   return (
     <section className="flex-1 p-4 lg:p-8">
@@ -86,7 +91,7 @@ export default async function ActivityPage() {
               {logs.map((log) => {
                 const Icon = iconMap[log.action as ActivityType] || Settings;
                 const formattedAction = formatAction(
-                  log.action as ActivityType
+                  log.action as ActivityType,
                 );
 
                 return (
@@ -115,7 +120,7 @@ export default async function ActivityPage() {
               </h3>
               <p className="text-sm text-gray-500 max-w-sm">
                 When you perform actions like signing in or updating your
-                account, they'll appear here.
+                account, they&apos;ll appear here.
               </p>
             </div>
           )}

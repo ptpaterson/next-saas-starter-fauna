@@ -6,9 +6,12 @@
     "start": "next start",
     "db:setup": "npx tsx lib/db/setup.ts",
     "db:seed": "npx tsx lib/db/seed.ts",
-    "db:generate": "drizzle-kit generate",
-    "db:migrate": "npx tsx lib/db/migrate.ts",
-    "db:studio": "drizzle-kit studio"
+    "db:studio": "drizzle-kit studio",
+    "schema:prod:push": "fauna schema push --active --no-input --config . -p prod",
+    "schema:local:push": "fauna schema push --active --no-input --config . -p local",
+    "lint": "next lint",
+    "format": "prettier -w --log-level silent .",
+    "format:check": "prettier -c ."
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.1.2",
@@ -31,6 +34,7 @@
     "dotenv": "^16.4.7",
     "drizzle-kit": "^0.30.1",
     "drizzle-orm": "^0.38.2",
+    "fauna": "^2.4.1",
     "jose": "^5.9.6",
     "lucide-react": "^0.468.0",
     "next": "15.1.1-canary.5",
@@ -46,6 +50,12 @@
     "tailwindcss-react-aria-components": "1.2.0",
     "typescript": "^5.7.2",
     "zod": "^3.24.1"
+  },
+  "devDependencies": {
+    "@eslint/eslintrc": "^3",
+    "dotenv-cli": "^8.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "^15.1.0",
+    "yaml": "^2.6.1"
   }
 }
-

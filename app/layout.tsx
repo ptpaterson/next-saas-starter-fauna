@@ -2,7 +2,7 @@ import './globals.css';
 import type { Metadata, Viewport } from 'next';
 import { Manrope } from 'next/font/google';
 import { UserProvider } from '@/lib/auth';
-import { getUser } from '@/lib/db/queries';
+import { getUserFromSession } from '@/lib/auth/session';
 
 export const metadata: Metadata = {
   title: 'Next.js SaaS Starter',
@@ -20,7 +20,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  let userPromise = getUser();
+  const userPromise = getUserFromSession();
 
   return (
     <html

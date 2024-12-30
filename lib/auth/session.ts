@@ -1,49 +1,53 @@
-import { compare, hash } from 'bcryptjs';
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
-import { NewUser } from '@/lib/db/schema';
+import { User } from '@/lib/db/schema';
+import { getUser } from '@/lib/db/queries';
 
 const key = new TextEncoder().encode(process.env.AUTH_SECRET);
-const SALT_ROUNDS = 10;
 
-export async function hashPassword(password: string) {
-  return hash(password, SALT_ROUNDS);
-}
-
-export async function comparePasswords(
-  plainTextPassword: string,
-  hashedPassword: string
-) {
-  return compare(plainTextPassword, hashedPassword);
-}
-
-type SessionData = {
-  user: { id: number };
+export type SessionData = {
+  user: { id: string };
   expires: string;
 };
 
-export async function signToken(payload: SessionData) {
+export const signToken = async (payload: SessionData) => {
   return await new SignJWT(payload)
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
     .setExpirationTime('1 day from now')
     .sign(key);
-}
+};
 
-export async function verifyToken(input: string) {
+export const verifyToken = async (input: string) => {
   const { payload } = await jwtVerify(input, key, {
     algorithms: ['HS256'],
   });
   return payload as SessionData;
-}
+};
 
-export async function getSession() {
-  const session = (await cookies()).get('session')?.value;
-  if (!session) return null;
-  return await verifyToken(session);
-}
+export const getSession = async () => {
+  const sessionCookie = (await cookies()).get('session');
+  if (!sessionCookie || !sessionCookie.value) {
+    return null;
+  }
 
-export async function setSession(user: NewUser) {
+  const sessionData = await verifyToken(sessionCookie.value);
+  if (
+    !sessionData ||
+    !sessionData.user ||
+    typeof sessionData.user.id !== 'string'
+  ) {
+    return null;
+  }
+
+  if (new Date(sessionData.expires) < new Date()) {
+    return null;
+  }
+
+  return sessionData;
+};
+
+export const setSession = async (user: User) => {
   const expiresInOneDay = new Date(Date.now() + 24 * 60 * 60 * 1000);
   const session: SessionData = {
     user: { id: user.id! },
@@ -56,4 +60,13 @@ export async function setSession(user: NewUser) {
     secure: true,
     sameSite: 'lax',
   });
-}
+};
+
+export const getUserFromSession = async (): Promise<User | null> => {
+  const session = await getSession();
+  if (!session) {
+    return null;
+  }
+  const user = await getUser(session.user.id);
+  return user;
+};
