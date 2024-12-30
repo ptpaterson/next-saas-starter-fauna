@@ -86,12 +86,12 @@ export default async function ActivityPage() {
           <CardTitle>Recent Activity</CardTitle>
         </CardHeader>
         <CardContent>
-          {logs.length > 0 ? (
+          {logs.data.length > 0 ? (
             <ul className="space-y-4">
-              {logs.map((log) => {
+              {logs.data.map((log) => {
                 const Icon = iconMap[log.action as ActivityType] || Settings;
                 const formattedAction = formatAction(
-                  log.action as ActivityType,
+                  log.action as ActivityType
                 );
 
                 return (
@@ -124,6 +124,9 @@ export default async function ActivityPage() {
               </p>
             </div>
           )}
+          {!!logs.after
+            ? `There's more activity. TODO: add a "load more" button.`
+            : null}
         </CardContent>
       </Card>
     </section>

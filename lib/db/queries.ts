@@ -12,6 +12,11 @@ import {
 import { getServerClient } from './client';
 import { fql, ServiceError } from 'fauna';
 
+export type Page<T>= {
+  data: T[];
+  after?: string;
+}
+
 export const getUser = async (userId: string): Promise<User | null> => {
   const client = getServerClient();
   const response = await client.query<User>(fql`
@@ -118,12 +123,22 @@ export const updateTeamSubscription = async (
 
 export const getActivityLogs = async (
   userId: string,
-): Promise<ActivityLog[]> => {
+  after?: string,
+): Promise<Page<ActivityLog>> => {
   const client = getServerClient();
-  const response = await client.query<ActivityLog[]>(fql`
-    let user = User.byId(${userId})!
-    ActivityLog.by_user(user)
-  `);
+
+  let query;
+
+  if (after) {
+    query = fql`Set.paginate(${after})`;
+  } else {
+    query = fql`
+      let user = User.byId(${userId})!
+      ActivityLog.by_user(user)
+    `;
+  }
+
+  const response = await client.query<Page<ActivityLog>>(query);
 
   return response.data;
 };
