@@ -3,9 +3,9 @@ import { redirect } from 'next/navigation';
 import { Team } from '@/lib/db/schema';
 import {
   getTeamByStripeCustomerId,
-  getUser,
   updateTeamSubscription,
 } from '@/lib/db/queries';
+import { getUserFromSession } from '../auth/session';
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2024-06-20',
@@ -18,7 +18,7 @@ export async function createCheckoutSession({
   team: Team | null;
   priceId: string;
 }) {
-  const user = await getUser();
+  const user = await getUserFromSession();
 
   if (!team || !user) {
     redirect(`/sign-up?redirect=checkout&priceId=${priceId}`);
@@ -128,6 +128,7 @@ export async function handleSubscriptionChange(
   if (status === 'active' || status === 'trialing') {
     const plan = subscription.items.data[0]?.plan;
     await updateTeamSubscription(team.id, {
+      stripeCustomerId: customerId,
       stripeSubscriptionId: subscriptionId,
       stripeProductId: plan?.product as string,
       planName: (plan?.product as Stripe.Product).name,
@@ -135,6 +136,7 @@ export async function handleSubscriptionChange(
     });
   } else if (status === 'canceled' || status === 'unpaid') {
     await updateTeamSubscription(team.id, {
+      stripeCustomerId: customerId,
       stripeSubscriptionId: null,
       stripeProductId: null,
       planName: null,

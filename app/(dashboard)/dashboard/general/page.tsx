@@ -18,7 +18,7 @@ export default function GeneralPage() {
   const { user } = useUser();
   const [state, formAction, isPending] = useActionState<ActionState, FormData>(
     updateAccount,
-    { error: '', success: '' }
+    { error: '', success: '' },
   );
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -76,7 +76,7 @@ export default function GeneralPage() {
             )}
             <Button
               type="submit"
-              className="bg-orange-500 hover:bg-orange-600 text-white"
+              className="bg-[#4e3cbf] hover:bg-[#1f0c66] text-white"
               disabled={isPending}
             >
               {isPending ? (

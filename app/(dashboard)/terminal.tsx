@@ -3,22 +3,22 @@
 import { useState, useEffect } from 'react';
 import { Copy, Check } from 'lucide-react';
 
+const terminalSteps = [
+  'git clone https://github.com/ptpaterson/next-saas-starter-fauna',
+  'pnpm install',
+  'pnpm db:setup',
+  'pnpm db:seed',
+  'pnpm dev 🎉',
+];
+
 export function Terminal() {
   const [terminalStep, setTerminalStep] = useState(0);
   const [copied, setCopied] = useState(false);
-  const terminalSteps = [
-    'git clone https://github.com/leerob/next-saas-starter',
-    'pnpm install',
-    'pnpm db:setup',
-    'pnpm db:migrate',
-    'pnpm db:seed',
-    'pnpm dev 🎉',
-  ];
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setTerminalStep((prev) =>
-        prev < terminalSteps.length - 1 ? prev + 1 : prev
+        prev < terminalSteps.length - 1 ? prev + 1 : prev,
       );
     }, 500);
 

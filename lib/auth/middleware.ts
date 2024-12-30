@@ -1,7 +1,8 @@
 import { z } from 'zod';
-import { TeamDataWithMembers, User } from '@/lib/db/schema';
-import { getTeamForUser, getUser } from '@/lib/db/queries';
+import { Team, WithMembers, User } from '@/lib/db/schema';
+import { getTeamForUserWithMembers } from '@/lib/db/queries';
 import { redirect } from 'next/navigation';
+import { getUserFromSession } from './session';
 
 export type ActionState = {
   error?: string;
@@ -11,14 +12,14 @@ export type ActionState = {
 
 type ValidatedActionFunction<S extends z.ZodType<any, any>, T> = (
   data: z.infer<S>,
-  formData: FormData
+  formData: FormData,
 ) => Promise<T>;
 
 export function validatedAction<S extends z.ZodType<any, any>, T>(
   schema: S,
-  action: ValidatedActionFunction<S, T>
+  action: ValidatedActionFunction<S, T>,
 ) {
-  return async (prevState: ActionState, formData: FormData): Promise<T> => {
+  return async (_prevState: ActionState, formData: FormData): Promise<T> => {
     const result = schema.safeParse(Object.fromEntries(formData));
     if (!result.success) {
       return { error: result.error.errors[0].message } as T;
@@ -31,15 +32,15 @@ export function validatedAction<S extends z.ZodType<any, any>, T>(
 type ValidatedActionWithUserFunction<S extends z.ZodType<any, any>, T> = (
   data: z.infer<S>,
   formData: FormData,
-  user: User
+  user: User,
 ) => Promise<T>;
 
 export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
   schema: S,
-  action: ValidatedActionWithUserFunction<S, T>
+  action: ValidatedActionWithUserFunction<S, T>,
 ) {
-  return async (prevState: ActionState, formData: FormData): Promise<T> => {
-    const user = await getUser();
+  return async (_prevState: ActionState, formData: FormData): Promise<T> => {
+    const user = await getUserFromSession();
     if (!user) {
       throw new Error('User is not authenticated');
     }
@@ -55,17 +56,17 @@ export function validatedActionWithUser<S extends z.ZodType<any, any>, T>(
 
 type ActionWithTeamFunction<T> = (
   formData: FormData,
-  team: TeamDataWithMembers
+  team: Team & WithMembers,
 ) => Promise<T>;
 
 export function withTeam<T>(action: ActionWithTeamFunction<T>) {
   return async (formData: FormData): Promise<T> => {
-    const user = await getUser();
+    const user = await getUserFromSession();
     if (!user) {
       redirect('/sign-in');
     }
 
-    const team = await getTeamForUser(user.id);
+    const team = await getTeamForUserWithMembers(user.id);
     if (!team) {
       throw new Error('Team not found');
     }

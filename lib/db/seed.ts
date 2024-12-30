@@ -1,7 +1,11 @@
+import 'dotenv/config';
+import { Client, fql } from 'fauna';
+
 import { stripe } from '../payments/stripe';
-import { db } from './drizzle';
-import { users, teams, teamMembers } from './schema';
-import { hashPassword } from '@/lib/auth/session';
+
+const client = new Client({
+  secret: process.env.FAUNA_ADMIN_SECRET!,
+});
 
 async function createStripeProducts() {
   console.log('Creating Stripe products and prices...');
@@ -42,33 +46,34 @@ async function createStripeProducts() {
 async function seed() {
   const email = 'test@test.com';
   const password = 'admin123';
-  const passwordHash = await hashPassword(password);
 
-  const [user] = await db
-    .insert(users)
-    .values([
-      {
-        email: email,
-        passwordHash: passwordHash,
-        role: "owner",
-      },
-    ])
-    .returning();
-
-  console.log('Initial user created.');
-
-  const [team] = await db
-    .insert(teams)
-    .values({
-      name: 'Test Team',
+  // bootstrap a new user and team in the Fauna database with a single transaction
+  await client.query(fql`
+    // Create a user
+    let user = User.create({
+      email: ${email},
+      role: "owner",
     })
-    .returning();
+    
+    // Create credentials for the user.
+    // The password will be automatically hashed by Fauna
+    Credential.create({
+      document: user,
+      password: ${password},
+    })
 
-  await db.insert(teamMembers).values({
-    teamId: team.id,
-    userId: user.id,
-    role: 'owner',
-  });
+    // Create a team
+    let team = Team.create({
+      name: "Test Team",
+    })
+
+    // Connect the user and team together
+    TeamMember.create({
+      team: team,
+      user: user,
+      role: "owner",
+    })
+  `);
 
   await createStripeProducts();
 }
