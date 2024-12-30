@@ -96,3 +96,12 @@ export const USER_FIELDS_WITH_TEAM = fql`{
   deletedAt: .deletedAt.toString(),
   team ${TEAM_FIELDS},
 }`;
+
+export const ACTIVITY_LOG_FIELDS = fql`{
+  id,
+  team ${TEAM_FIELDS},
+  user ${USER_FIELDS},
+  action,
+  timestamp: .timestamp.toString(),
+  ipAddress,
+}`;

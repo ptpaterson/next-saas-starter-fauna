@@ -1,4 +1,5 @@
 import {
+  ACTIVITY_LOG_FIELDS,
   ACTIVITY_TYPES,
   ActivityLog,
   Team,
@@ -134,7 +135,7 @@ export const getActivityLogs = async (
   } else {
     query = fql`
       let user = User.byId(${userId})!
-      ActivityLog.by_user(user)
+      ActivityLog.by_user(user) ${ACTIVITY_LOG_FIELDS}
     `;
   }
 
